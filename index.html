@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Práctica: Partes del Microscopio</title>
+  <style>
+    :root {
+      --primary: #2c5aa0;
+      --accent: #e67e22;
+      --success: #27ae60;
+      --error: #c0392b;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: #222;
+      line-height: 1.5;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 1.8rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #555;
+      margin-bottom: 24px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      border: 2px solid var(--primary);
+      background: white;
+      color: var(--primary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .diagrama {
+      text-align: center;
+      margin-bottom: 24px;
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .diagrama img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .partes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .parte-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border-left: 5px solid var(--primary);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .parte-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+    .parte-card h3 {
+      color: var(--primary);
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+    .parte-card p {
+      font-size: 0.95rem;
+      color: #444;
+    }
+    .parte-card .func {
+      display: none;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #ddd;
+      color: #333;
+    }
+    .parte-card.abierta .func { display: block; }
+
+    .quiz-container {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .pregunta {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #222;
+    }
+    .opciones {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .opcion {
+      padding: 14px 18px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #fafafa;
+      font-size: 1rem;
+    }
+    .opcion:hover { border-color: var(--primary); background: #eef3fb; }
+    .opcion.seleccionada { border-color: var(--primary); background: #d6e4f7; }
+    .opcion.correcta { border-color: var(--success); background: #d4edda; }
+    .opcion.incorrecta { border-color: var(--error); background: #f8d7da; }
+    .feedback {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 500;
+      display: none;
+    }
+    .feedback.ok { background: #d4edda; color: #155724; display: block; }
+    .feedback.mal { background: #f8d7da; color: #721c24; display: block; }
+    .controles {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #1e3f7a; }
+    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-secondary:hover { background: #ccc; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .progreso {
+      margin-left: auto;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .resultado-final {
+      text-align: center;
+      padding: 30px;
+    }
+    .resultado-final h2 { color: var(--primary); margin-bottom: 12px; }
+    .puntuacion {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 16px 0;
+    }
+
+    .match-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 700px) {
+      .match-area { grid-template-columns: 1fr; }
+    }
+    .columna {
+      background: white;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .columna h3 {
+      text-align: center;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+    .item-match {
+      padding: 12px;
+      margin: 8px 0;
+      background: #f0f4f8;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.15s;
+      text-align: center;
+      font-weight: 500;
+    }
+    .item-match:hover { background: #e0e8f0; }
+    .item-match.seleccionado { border-color: var(--primary); background: #d6e4f7; }
+    .item-match.correcto { border-color: var(--success); background: #d4edda; pointer-events: none; }
+    .item-match.incorrecto { border-color: var(--error); background: #f8d7da; }
+    .match-feedback {
+      text-align: center;
+      margin-top: 16px;
+      font-weight: 600;
+      min-height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔬 Partes del Microscopio</h1>
+  <p class="subtitle">Practica e identifica las partes de un microscopio óptico compuesto</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="estudio">📚 Estudio</button>
+    <button class="tab-btn" data-tab="quiz">❓ Quiz</button>
+    <button class="tab-btn" data-tab="emparejar">🔗 Emparejar</button>
+  </div>
+
+  <!-- PANEL ESTUDIO -->
+  <div id="estudio" class="panel active">
+    <div class="diagrama">
+      <img src="microscopio.jpeg" alt="Diagrama de un microscopio con sus partes etiquetadas">
+    </div>
+    <p style="text-align:center; margin-bottom:16px; color:#555;">Haz clic en cada tarjeta para ver la función de la parte</p>
+    <div class="partes-grid" id="partes-grid"></div>
+  </div>
+
+  <!-- PANEL QUIZ -->
+  <div id="quiz" class="panel">
+    <div class="quiz-container">
+      <div id="quiz-content">
+        <div class="pregunta" id="pregunta"></div>
+        <div class="opciones" id="opciones"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="controles">
+          <button class="btn btn-primary" id="btn-comprobar" disabled>Comprobar</button>
+          <button class="btn btn-secondary" id="btn-siguiente" style="display:none;">Siguiente</button>
+          <span class="progreso" id="progreso"></span>
+        </div>
+      </div>
+      <div id="resultado-final" class="resultado-final" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- PANEL EMPAREJAR -->
+  <div id="emparejar" class="panel">
+    <div class="quiz-container">
+      <p style="text-align:center; margin-bottom:16px;">Selecciona una parte de la izquierda y luego su función de la derecha (o viceversa)</p>
+      <div class="match-area">
+        <div class="columna">
+          <h3>Partes</h3>
+          <div id="lista-partes"></div>
+        </div>
+        <div class="columna">
+          <h3>Funciones</h3>
+          <div id="lista-funciones"></div>
+        </div>
+      </div>
+      <div class="match-feedback" id="match-feedback"></div>
+      <div class="controles" style="justify-content:center; margin-top:20px;">
+        <button class="btn btn-secondary" id="btn-reiniciar-match">Reiniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const partes = [
+      {
+        nombre: "Ocular",
+        funcion: "Lente por donde se observa la muestra ampliada. Suele tener un aumento de 10x."
+      },
+      {
+        nombre: "Tubo",
+        funcion: "Conducto que une el ocular con el revólver y mantiene la distancia óptica correcta."
+      },
+      {
+        nombre: "Brazo",
+        funcion: "Estructura de soporte que une la base con el tubo. Se usa para transportar el microscopio."
+      },
+      {
+        nombre: "Revólver",
+        funcion: "Pieza giratoria que sostiene los objetivos y permite cambiar el aumento fácilmente."
+      },
+      {
+        nombre: "Objetivo",
+        funcion: "Lentes cercanas a la muestra que proporcionan el aumento principal (4x, 10x, 40x, 100x)."
+      },
+      {
+        nombre: "Platina",
+        funcion: "Plataforma horizontal donde se coloca y sujeta la muestra (portaobjetos)."
+      },
+      {
+        nombre: "Diafragma + Condensador",
+        funcion: "Regula la cantidad de luz y la concentra sobre la muestra para una mejor iluminación."
+      },
+      {
+        nombre: "Foco",
+        funcion: "Fuente de luz (lámpara) situada en la base que ilumina la muestra desde abajo."
+      },
+      {
+        nombre: "Tornillo macrométrico",
+        funcion: "Rueda grande que permite un enfoque grueso y rápido de la imagen."
+      },
+      {
+        nombre: "Tornillo micrométrico",
+        funcion: "Rueda pequeña que permite un enfoque fino y preciso de la imagen."
+      },
+      {
+        nombre: "Base",
+        funcion: "Soporte inferior del microscopio que le da estabilidad y suele contener la fuente de luz."
+      }
+    ];
+
+    // ===== ESTUDIO =====
+    const grid = document.getElementById('partes-grid');
+    partes.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'parte-card';
+      card.innerHTML = `<h3>${p.nombre}</h3><p>Haz clic para ver la función</p><div class="func">${p.funcion}</div>`;
+      card.addEventListener('click', () => card.classList.toggle('abierta'));
+      grid.appendChild(card);
+    });
+
+    // ===== TABS =====
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'quiz') iniciarQuiz();
+        if (btn.dataset.tab === 'emparejar') iniciarEmparejar();
+      });
+    });
+
+    // ===== QUIZ =====
+    let quizIndex = 0;
+    let aciertos = 0;
+    let ordenQuiz = [];
+    let seleccionActual = null;
+
+    function barajar(arr) {
+      return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function iniciarQuiz() {
+      ordenQuiz = barajar(partes);
+      quizIndex = 0;
+      aciertos = 0;
+      document.getElementById('quiz-content').style.display = 'block';
+      document.getElementById('resultado-final').style.display = 'none';
+      mostrarPregunta();
+    }
+
+    function mostrarPregunta() {
+      const p = ordenQuiz[quizIndex];
+      document.getElementById('pregunta').textContent = `¿Cuál es la función del/de la "${p.nombre}"?`;
+      document.getElementById('progreso').textContent = `${quizIndex + 1} / ${ordenQuiz.length}`;
+      
+      let opciones = [p.funcion];
+      const otras = barajar(partes.filter(x => x.nombre !== p.nombre)).slice(0, 3);
+      otras.forEach(o => opciones.push(o.funcion));
+      opciones = barajar(opciones);
+
+      const cont = document.getElementById('opciones');
+      cont.innerHTML = '';
+      seleccionActual = null;
+      document.getElementById('btn-comprobar').disabled = true;
+      document.getElementById('btn-siguiente').style.display = 'none';
+      document.getElementById('feedback').className = 'feedback';
+      document.getElementById('feedback').style.display = 'none';
+
+      opciones.forEach(op => {
+        const div = document.createElement('div');
+        div.className = 'opcion';
+        div.textContent = op;
+        div.addEventListener('click', () => {
+          if (document.getElementById('btn-siguiente').style.display === 'inline-block') return;
+          document.querySelectorAll('.opcion').forEach(o => o.classList.remove('seleccionada'));
+          div.classList.add('seleccionada');
+          seleccionActual = op;
+          document.getElementById('btn-comprobar').disabled = false;
+        });
+        cont.appendChild(div);
+      });
+    }
+
+    document.getElementById('btn-comprobar').addEventListener('click', () => {
+      const p = ordenQuiz[quizIndex];
+      const opciones = document.querySelectorAll('.opcion');
+      opciones.forEach(o => {
+        o.style.pointerEvents = 'none';
+        if (o.textContent === p.funcion) o.classList.add('correcta');
+        else if (o.classList.contains('seleccionada')) o.classList.add('incorrecta');
+      });
+
+      const fb = document.getElementById('feedback');
+      if (seleccionActual === p.funcion) {
+        aciertos++;
+        fb.textContent = '¡Correcto! 🎉';
+        fb.className = 'feedback ok';
+      } else {
+        fb.textContent = `Incorrecto. La respuesta correcta es: ${p.funcion}`;
+        fb.className = 'feedback mal';
+      }
+      document.getElementById('btn-comprobar').style.display = 'none';
+      document.getElementById('btn-siguiente').style.display = 'inline-block';
+    });
+
+    document.getElementById('btn-siguiente').addEventListener('click', () => {
+      quizIndex++;
+      document.getElementById('btn-comprobar').style.display = 'inline-block';
+      if (quizIndex < ordenQuiz.length) {
+        mostrarPregunta();
+      } else {
+        document.getElementById('quiz-content').style.display = 'none';
+        const res = document.getElementById('resultado-final');
+        res.style.display = 'block';
+        const pct = Math.round((aciertos / ordenQuiz.length) * 100);
+        res.innerHTML = `
+          <h2>¡Quiz terminado!</h2>
+          <div class="puntuacion">${aciertos} / ${ordenQuiz.length}</div>
+          <p>Porcentaje: ${pct}%</p>
+          <p style="margin:16px 0;">${pct >= 80 ? '¡Excelente trabajo! 👏' : pct >= 50 ? 'Bien, sigue practicando 💪' : 'Repasa el diagrama e inténtalo de nuevo 📚'}</p>
+          <button class="btn btn-primary" onclick="iniciarQuiz()">Volver a intentar</button>
+        `;
+      }
+    });
+
+    // ===== EMPAREJAR =====
+    let seleccionMatch = null;
+    let paresCorrectos = 0;
+
+    function iniciarEmparejar() {
+      paresCorrectos = 0;
+      document.getElementById('match-feedback').textContent = '';
+      const listaP = document.getElementById('lista-partes');
+      const listaF = document.getElementById('lista-funciones');
+      listaP.innerHTML = '';
+      listaF.innerHTML = '';
+
+      const partesBarajadas = barajar(partes);
+      const funcionesBarajadas = barajar(partes);
+
+      partesBarajadas.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'item-match';
+        div.textContent = p.nombre;
+        div.dataset.nombre = p.nombre;
+        div.addEventListener('click', () => manejarClickMatch(div, 'parte'));
+        listaP.appendChild(div);
+      });
+
+      funcionesBarajadas.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'item-match';
+        div.textContent = p.funcion;
+        div.dataset.nombre = p.nombre;
+        div.addEventListener('click', () => manejarClickMatch(div, 'funcion'));
+        listaF.appendChild(div);
+      });
+    }
+
+    function manejarClickMatch(elem, tipo) {
+      if (elem.classList.contains('correcto')) return;
+
+      if (!seleccionMatch) {
+        seleccionMatch = { elem, tipo };
+        elem.classList.add('seleccionado');
+        return;
+      }
+
+      if (seleccionMatch.tipo === tipo) {
+        seleccionMatch.elem.classList.remove('seleccionado');
+        seleccionMatch = { elem, tipo };
+        elem.classList.add('seleccionado');
+        return;
+      }
+
+      const otro = seleccionMatch.elem;
+      otro.classList.remove('seleccionado');
+      elem.classList.remove('seleccionado');
+
+      if (otro.dataset.nombre === elem.dataset.nombre) {
+        otro.classList.add('correcto');
+        elem.classList.add('correcto');
+        paresCorrectos++;
+        document.getElementById('match-feedback').textContent = `✅ ¡Correcto! (${paresCorrectos}/11)`;
+        document.getElementById('match-feedback').style.color = 'var(--success)';
+        if (paresCorrectos === 11) {
+          document.getElementById('match-feedback').textContent = '🎉 ¡Has emparejado todas las partes correctamente!';
+        }
+      } else {
+        otro.classList.add('incorrecto');
+        elem.classList.add('incorrecto');
+        document.getElementById('match-feedback').textContent = '❌ No coinciden. Inténtalo de nuevo.';
+        document.getElementById('match-feedback').style.color = 'var(--error)';
+        setTimeout(() => {
+          otro.classList.remove('incorrecto');
+          elem.classList.remove('incorrecto');
+        }, 800);
+      }
+      seleccionMatch = null;
+    }
+
+    document.getElementById('btn-reiniciar-match').addEventListener('click', iniciarEmparejar);
+  </script>
+</body>
+</html>
